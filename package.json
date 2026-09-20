@@ -1,0 +1,27 @@
+{
+  "name": "formbox",
+  "version": "0.1.0",
+  "description": "Minimal SolidJS form library with native TypeBox validation",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "peerDependencies": {
+    "solid-js": ">=1.8.0",
+    "@sinclair/typebox": ">=0.32.0"
+  },
+  "devDependencies": {
+    "@sinclair/typebox": "^0.34.52",
+    "@types/bun": "^1.4.2",
+    "solid-js": "^1.9.15",
+    "typescript": "^5.9.3"
+  },
+  "keywords": ["solidjs", "form", "typebox", "validation", "typescript"],
+  "license": "MIT"
+}
