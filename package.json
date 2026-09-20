@@ -23,5 +23,5 @@
     "typescript": "^5.9.3"
   },
   "keywords": ["solidjs", "form", "typebox", "validation", "typescript"],
-  "license": "MIT"
+  "license": "GPL-2.0"
 }

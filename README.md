@@ -134,4 +134,4 @@ function SignupPage() {
 
 ## License
 
-MIT
+GPL-2.0
