@@ -8,11 +8,11 @@ Minimal SolidJS form library with **native TypeBox validation**. Zero adapters, 
 bun add formbox solid-js @sinclair/typebox
 ```
 
-## Quick Start (Component API)
+## Quick Start (Global Component API)
 
 ```tsx
 import { Type } from "@sinclair/typebox";
-import { createForm } from "formbox";
+import { createForm, Form, Field, ErrorMessage } from "formbox";
 
 const LoginSchema = Type.Object({
   email: Type.String({ format: "email" }),
@@ -28,31 +28,23 @@ function LoginPage() {
   };
 
   return (
-    <form.Form onSubmit={onSubmit}>
-      <form.Field name="email">
-        {(field, state) => (
-          <div>
-            <label>Email</label>
-            <input {...field} type="email" placeholder="you@company.com" />
-            <form.ErrorMessage name="email" class="text-red-500 text-sm" />
-          </div>
-        )}
-      </form.Field>
+    <Form form={form} onSubmit={onSubmit} class="space-y-4">
+      <div>
+        <label>Email</label>
+        <Field name="email" type="email" placeholder="you@company.com" />
+        <ErrorMessage name="email" class="text-red-500 text-sm" />
+      </div>
 
-      <form.Field name="password">
-        {(field, state) => (
-          <div>
-            <label>Password</label>
-            <input {...field} type="password" placeholder="••••••••" />
-            <form.ErrorMessage name="password" class="text-red-500 text-sm" />
-          </div>
-        )}
-      </form.Field>
+      <div>
+        <label>Password</label>
+        <Field name="password" type="password" placeholder="••••••••" />
+        <ErrorMessage name="password" class="text-red-500 text-sm" />
+      </div>
 
       <button type="submit" disabled={form.submitting()}>
         {form.submitting() ? "Signing in..." : "Sign In"}
       </button>
-    </form.Form>
+    </Form>
   );
 }
 ```
@@ -63,22 +55,13 @@ function LoginPage() {
 
 Creates a reactive form instance from a TypeBox `Type.Object()` schema.
 
-### UI Components (Formik/Modular Forms style)
+### UI Components
 
 | Component | Description |
 |---|---|
-| `<form.Form>` | Wrapper component. Handles `e.preventDefault()`, touches all fields, validates, and runs `onSubmit` only if valid. |
-| `<form.Field name="xyz">` | Render prop component. Injects `{ name, value, onInput, onBlur }` and `state: { error, touched }`. |
-| `<form.ErrorMessage name="xyz">` | Conditionally renders the error message if the field is invalid and touched. |
-
-### Hook State
-
-| Property | Type | Description |
-|---|---|---|
-| `form.submitting()` | `boolean` | Whether submit handler is running |
-| `form.valid()` | `boolean` | Whether the form is currently valid |
-| `form.values()` | `Partial<Static<T>>` | Current form values |
-| `form.reset()` | `void` | Reset values, errors, and touched state |
+| `<Form form={form} onSubmit={...}>` | Provider wrapper. Handles `e.preventDefault()`, validates, and runs `onSubmit` only if valid. |
+| `<Field name="xyz" type="text" />` | Automatically binds `value`, `onInput`, `onBlur` from the FormContext. |
+| `<ErrorMessage name="xyz">` | Conditionally renders the error message if the field is invalid and touched. |
 
 ## License
 

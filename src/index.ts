@@ -1,3 +1,3 @@
-export { createForm } from "./create-form";
-export type { FormInstance, FieldProps, CheckboxFieldProps } from "./types";
+export { createForm, Form, Field, ErrorMessage } from "./core";
+export type { FormInstance } from "./core";
 export * from "./formats";
