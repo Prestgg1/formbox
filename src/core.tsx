@@ -1,3 +1,4 @@
+import "./formats";
 import { type TObject, type Static } from "@sinclair/typebox";
 import { TypeCompiler, type TypeCheck } from "@sinclair/typebox/compiler";
 import { createSignal, createMemo, createContext, useContext, splitProps, type JSX, Show } from "solid-js";

@@ -5,14 +5,16 @@ Minimal SolidJS form library with **native TypeBox validation**. Zero adapters, 
 ## Install
 
 ```bash
-bun add formbox solid-js @sinclair/typebox
+bun add @prestgg/formbox solid-js @sinclair/typebox
+# or
+npm install @prestgg/formbox solid-js @sinclair/typebox
 ```
 
 ## Quick Start (Global Component API)
 
 ```tsx
 import { Type } from "@sinclair/typebox";
-import { createForm, Form, Field, ErrorMessage } from "formbox";
+import { createForm, Form, Field, ErrorMessage } from "@prestgg/formbox";
 
 const LoginSchema = Type.Object({
   email: Type.String({ format: "email" }),

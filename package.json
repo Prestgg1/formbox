@@ -1,6 +1,6 @@
 {
-  "name": "formbox",
-  "version": "0.1.0",
+  "name": "@prestgg/formbox",
+  "version": "0.1.2",
   "description": "Minimal SolidJS form library with native TypeBox validation",
   "type": "module",
   "main": "./src/index.ts",
@@ -8,9 +8,20 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "sideEffects": [
+    "./src/formats.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Prestgg1/formbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Prestgg1/formbox/issues"
+  },
+  "homepage": "https://github.com/Prestgg1/formbox#readme",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test --conditions=browser"
   },
   "peerDependencies": {
     "solid-js": ">=1.8.0",
