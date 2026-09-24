@@ -1,6 +1,10 @@
 import type { TObject, Static } from "@sinclair/typebox";
 import type { Accessor, JSX } from "solid-js";
 
+export interface CreateFormOptions<T extends TObject> {
+  initialValues?: Partial<Static<T>>;
+}
+
 export interface FormInstance<T extends TObject> {
   schema: T;
   values: Accessor<Partial<Static<T>>>;
@@ -10,6 +14,9 @@ export interface FormInstance<T extends TObject> {
   
   error: (name: string) => string | undefined;
   touched: (name: string) => boolean;
+
+  setValues: (values: Partial<Static<T>> | ((prev: Partial<Static<T>>) => Partial<Static<T>>)) => void;
+  setValue: <K extends keyof Static<T> & string>(field: K, value: Static<T>[K]) => void;
   
   // Internal bindings for components
   _fieldProps: (name: string) => {
@@ -25,3 +32,4 @@ export interface FormInstance<T extends TObject> {
 
   reset: () => void;
 }
+

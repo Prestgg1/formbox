@@ -57,4 +57,53 @@ describe("FormBox Core API", () => {
     expect(form.values().email).toBeUndefined();
     expect(form.touched("email")).toBe(false);
   });
+
+  it("supports custom formats registered via addFormat", async () => {
+    const { addFormat } = await import("./formats");
+    addFormat("voen", (v) => /^\d{10}$/.test(v));
+
+    const CompanySchema = Type.Object({
+      taxId: Type.String({ format: "voen" }),
+    });
+
+    const form = createForm(CompanySchema);
+    const taxField = form._fieldProps("taxId");
+
+    taxField.onInput({ currentTarget: { value: "123" } } as any);
+    taxField.onBlur();
+    expect(form.error("taxId")).toBeDefined();
+    expect(form.error("taxId")).not.toContain("Unknown format");
+
+    taxField.onInput({ currentTarget: { value: "1234567890" } } as any);
+    taxField.onBlur();
+    expect(form.error("taxId")).toBeUndefined();
+    expect(form.valid()).toBe(true);
+  });
+
+  it("supports initialValues in createForm options", () => {
+    const form = createForm(LoginSchema, {
+      initialValues: { email: "initial@example.com" },
+    });
+
+    expect(form.values().email).toBe("initial@example.com");
+    expect(form._fieldProps("email").value).toBe("initial@example.com");
+
+    form.reset();
+    expect(form.values().email).toBe("initial@example.com");
+  });
+
+  it("supports setting values via setValue and setValues", () => {
+    const form = createForm(LoginSchema);
+
+    form.setValue("email", "setvalue@example.com");
+    expect(form.values().email).toBe("setvalue@example.com");
+    expect(form._fieldProps("email").value).toBe("setvalue@example.com");
+
+    form.setValues({ email: "updated@example.com", password: "password123" });
+    expect(form.values().email).toBe("updated@example.com");
+    expect(form.values().password).toBe("password123");
+    expect(form.valid()).toBe(true);
+  });
 });
+
+

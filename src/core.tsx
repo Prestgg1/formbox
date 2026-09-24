@@ -1,9 +1,13 @@
-import "./formats";
+import { registerDefaultFormats } from "./formats";
 import { type TObject, type Static } from "@sinclair/typebox";
 import { TypeCompiler, type TypeCheck } from "@sinclair/typebox/compiler";
 import { createSignal, createMemo, createContext, useContext, splitProps, type JSX, Show } from "solid-js";
 
 // --- Types ---
+
+export interface CreateFormOptions<T extends TObject> {
+  initialValues?: Partial<Static<T>>;
+}
 
 export interface FormInstance<T extends TObject> {
   schema: T;
@@ -14,6 +18,9 @@ export interface FormInstance<T extends TObject> {
   
   error: (name: string) => string | undefined;
   touched: (name: string) => boolean;
+
+  setValues: (values: Partial<Static<T>> | ((prev: Partial<Static<T>>) => Partial<Static<T>>)) => void;
+  setValue: <K extends keyof Static<T> & string>(field: K, value: Static<T>[K]) => void;
   
   _fieldProps: (name: string) => {
     name: string;
@@ -36,6 +43,7 @@ const compilerCache = new WeakMap<TObject, TypeCheck<TObject>>();
 function getCompiler<T extends TObject>(schema: T): TypeCheck<T> {
   let compiled = compilerCache.get(schema) as TypeCheck<T> | undefined;
   if (!compiled) {
+    registerDefaultFormats();
     compiled = TypeCompiler.Compile(schema) as TypeCheck<T>;
     compilerCache.set(schema, compiled as TypeCheck<TObject>);
   }
@@ -57,16 +65,33 @@ function validate<T extends TObject>(
 
 // --- Form Instance ---
 
-export function createForm<T extends TObject>(schema: T): FormInstance<T> {
+export function createForm<T extends TObject>(
+  schema: T,
+  options?: CreateFormOptions<T>
+): FormInstance<T> {
   type Values = Static<T>;
   const compiler = getCompiler(schema);
 
-  const [values, setValues] = createSignal<Record<string, unknown>>({});
+  const [values, setValues] = createSignal<Record<string, unknown>>(
+    options?.initialValues ? { ...options.initialValues } : {}
+  );
   const [touchedFields, setTouched] = createSignal<Record<string, boolean>>({});
   const [submitting, setSubmitting] = createSignal(false);
 
   const currentErrors = createMemo(() => validate(compiler, values()));
   const valid = createMemo(() => Object.keys(currentErrors()).length === 0);
+
+  function setValue<K extends keyof Values & string>(field: K, value: Values[K]) {
+    setValues((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function setValuesState(updater: Partial<Values> | ((prev: Partial<Values>) => Partial<Values>)) {
+    if (typeof updater === "function") {
+      setValues((prev) => ({ ...prev, ...updater(prev as Partial<Values>) }));
+    } else {
+      setValues((prev) => ({ ...prev, ...updater }));
+    }
+  }
 
   function _fieldProps(name: string) {
     return {
@@ -103,7 +128,7 @@ export function createForm<T extends TObject>(schema: T): FormInstance<T> {
   }
 
   function reset() {
-    setValues({});
+    setValues(options?.initialValues ? { ...options.initialValues } : {});
     setTouched({});
     setSubmitting(false);
   }
@@ -135,6 +160,8 @@ export function createForm<T extends TObject>(schema: T): FormInstance<T> {
     errors,
     error,
     touched,
+    setValues: setValuesState,
+    setValue,
     _fieldProps,
     _internalSubmit,
     reset,

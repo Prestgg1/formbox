@@ -31,6 +31,9 @@ export function registerDefaultFormats() {
   }
 }
 
+export function addFormat(name: string, validator: (value: string) => boolean) {
+  FormatRegistry.Set(name, validator);
+}
+
 // Auto-register formats on import
 registerDefaultFormats();
-
