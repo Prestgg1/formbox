@@ -162,3 +162,20 @@ describe("Union schemas", () => {
     expect(form.valid()).toBe(true);
   });
 });
+
+describe("Field value types", () => {
+  it("accepts values for optional fields (setValue, setValues, initialValues)", () => {
+    const Settings = Type.Object({
+      name: Type.String({ minLength: 1 }),
+      description: Type.Optional(Type.String()),
+      active: Type.Optional(Type.Boolean()),
+      tags: Type.Optional(Type.Array(Type.String())),
+    });
+    const form = createForm(Settings, { initialValues: { name: "Bordaz", description: "" } });
+    form.setValue("active", true);
+    form.setValue("tags", ["a"]);
+    form.setValues({ name: "Board", description: "Kanban" });
+    expect(form.values()).toEqual({ name: "Board", description: "Kanban", active: true, tags: ["a"] });
+    expect(form.valid()).toBe(true);
+  });
+});

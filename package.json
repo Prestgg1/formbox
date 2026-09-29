@@ -1,6 +1,6 @@
 {
   "name": "@prestgg/formbox",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Minimal SolidJS form library with native TypeBox validation",
   "type": "module",
   "main": "./src/index.ts",

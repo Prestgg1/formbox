@@ -18,8 +18,10 @@ export type FieldName<T extends FormSchema> = T extends TUnion<infer V>
 
 /** A field's value type (across the union variants that have it). */
 export type FieldValue<T extends FormSchema, K extends string> = Static<T> extends infer S
-  ? S extends Record<K, infer V>
-    ? V
+  ? S extends unknown
+    ? K extends keyof S
+      ? S[K]
+      : never
     : never
   : never;
 
