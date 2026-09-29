@@ -65,6 +65,30 @@ Creates a reactive form instance from a TypeBox `Type.Object()` schema.
 | `<Field name="xyz" type="text" />` | Automatically binds `value`, `onInput`, `onBlur` from the FormContext. |
 | `<ErrorMessage name="xyz">` | Conditionally renders the error message if the field is invalid and touched. |
 
+## Rules across fields (union schemas)
+
+`createForm` also takes a union of objects. The form has every field of every variant and is valid
+when any variant accepts the values; otherwise the closest variant's errors show on its fields.
+
+```tsx
+// A note or a link (at least one)
+const ProofSchema = Type.Union([
+  Type.Object({ note: Type.String({ pattern: "\\S" }), url: Type.String() }),
+  Type.Object({ note: Type.String(), url: Type.String({ pattern: "^https?://\\S+$" }) }),
+]);
+
+// A reason only when rejecting
+const ReviewSchema = Type.Union([
+  Type.Object({ decision: Type.Literal("approve") }),
+  Type.Object({ decision: Type.Literal("reject"), note: Type.String({ minLength: 1 }) }),
+]);
+
+const form = createForm(ProofSchema, { initialValues: { note: "", url: "" } });
+form.valid(); // false until a note or an http(s) link is given
+```
+
+The same schema validates the request on the server, so the rule lives in one place.
+
 ## License
 
 GPL-2.0

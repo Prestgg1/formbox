@@ -107,3 +107,58 @@ describe("FormBox Core API", () => {
 });
 
 
+
+// "A note or a link": a rule across fields, as a union of objects.
+const ProofSchema = Type.Union([
+  Type.Object({ note: Type.String({ pattern: "\\S" }), url: Type.String() }),
+  Type.Object({ note: Type.String(), url: Type.String({ pattern: "^https?://\\S+$" }) }),
+]);
+
+describe("Union schemas", () => {
+  it("is valid when any variant accepts the values", () => {
+    const form = createForm(ProofSchema, { initialValues: { note: "", url: "" } });
+    expect(form.valid()).toBe(false);
+
+    form.setValue("note", "Done");
+    expect(form.valid()).toBe(true);
+
+    form.setValues({ note: "", url: "https://example.com/pr/1" });
+    expect(form.valid()).toBe(true);
+  });
+
+  it("shows the closest variant's errors on its fields after submit", async () => {
+    const form = createForm(ProofSchema, { initialValues: { note: "", url: "ftp://x" } });
+    let submitted = false;
+    await form._internalSubmit(() => {
+      submitted = true;
+    })({ preventDefault() {} } as Event);
+
+    expect(submitted).toBe(false);
+    // Every field of every variant is touched; one variant fails on a single field.
+    expect(form.touched("note")).toBe(true);
+    expect(form.touched("url")).toBe(true);
+    expect(Object.keys(form.errors())).toHaveLength(1);
+  });
+
+  it("submits the values when a variant matches", async () => {
+    const form = createForm(ProofSchema, { initialValues: { note: "Fixed", url: "" } });
+    let received: unknown;
+    await form._internalSubmit((values) => {
+      received = values;
+    })({ preventDefault() {} } as Event);
+    expect(received).toEqual({ note: "Fixed", url: "" });
+  });
+
+  it("uses a discriminated union's fields together", () => {
+    const Review = Type.Union([
+      Type.Object({ decision: Type.Literal("approve") }),
+      Type.Object({ decision: Type.Literal("reject"), note: Type.String({ minLength: 1 }) }),
+    ]);
+    const form = createForm(Review, { initialValues: { decision: "reject", note: "" } });
+    expect(form.valid()).toBe(false);
+    form.setValue("note", "Tests fail");
+    expect(form.valid()).toBe(true);
+    form.setValues({ decision: "approve" });
+    expect(form.valid()).toBe(true);
+  });
+});
