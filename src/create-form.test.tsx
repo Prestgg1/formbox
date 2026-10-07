@@ -1,4 +1,5 @@
 import { describe, it, expect } from "bun:test";
+import { flush } from "solid-js";
 import { Type } from "@sinclair/typebox";
 import { createForm } from "./core";
 
@@ -19,7 +20,9 @@ describe("FormBox Core API", () => {
 
     // Invalid email input
     emailField.onInput({ currentTarget: { value: "not-an-email" } } as any);
+    flush();
     emailField.onBlur();
+    flush();
 
     expect(form.touched("email")).toBe(true);
     const err = form.error("email");
@@ -31,7 +34,9 @@ describe("FormBox Core API", () => {
   it("marks form valid when all fields including email format are satisfied", () => {
     const form = createForm(LoginSchema);
     form._fieldProps("email").onInput({ currentTarget: { value: "user@example.com" } } as any);
+    flush();
     form._fieldProps("password").onInput({ currentTarget: { value: "12345678" } } as any);
+    flush();
 
     expect(form.valid()).toBe(true);
     expect(form.error("email")).toBeUndefined();
@@ -42,18 +47,23 @@ describe("FormBox Core API", () => {
     const emailField = form._fieldProps("email");
     
     emailField.onInput({ currentTarget: { value: "invalid-email" } } as any);
+    flush();
     expect(form.values().email).toBe("invalid-email");
     
     emailField.onBlur();
+    flush();
     expect(form.touched("email")).toBe(true);
   });
   
   it("resets form state correctly", () => {
     const form = createForm(LoginSchema);
     form._fieldProps("email").onInput({ currentTarget: { value: "test@example.com" } } as any);
+    flush();
     form._fieldProps("email").onBlur();
+    flush();
     
     form.reset();
+    flush();
     expect(form.values().email).toBeUndefined();
     expect(form.touched("email")).toBe(false);
   });
@@ -70,12 +80,16 @@ describe("FormBox Core API", () => {
     const taxField = form._fieldProps("taxId");
 
     taxField.onInput({ currentTarget: { value: "123" } } as any);
+    flush();
     taxField.onBlur();
+    flush();
     expect(form.error("taxId")).toBeDefined();
     expect(form.error("taxId")).not.toContain("Unknown format");
 
     taxField.onInput({ currentTarget: { value: "1234567890" } } as any);
+    flush();
     taxField.onBlur();
+    flush();
     expect(form.error("taxId")).toBeUndefined();
     expect(form.valid()).toBe(true);
   });
@@ -89,6 +103,7 @@ describe("FormBox Core API", () => {
     expect(form._fieldProps("email").value).toBe("initial@example.com");
 
     form.reset();
+    flush();
     expect(form.values().email).toBe("initial@example.com");
   });
 
@@ -96,10 +111,12 @@ describe("FormBox Core API", () => {
     const form = createForm(LoginSchema);
 
     form.setValue("email", "setvalue@example.com");
+    flush();
     expect(form.values().email).toBe("setvalue@example.com");
     expect(form._fieldProps("email").value).toBe("setvalue@example.com");
 
     form.setValues({ email: "updated@example.com", password: "password123" });
+    flush();
     expect(form.values().email).toBe("updated@example.com");
     expect(form.values().password).toBe("password123");
     expect(form.valid()).toBe(true);
@@ -120,9 +137,11 @@ describe("Union schemas", () => {
     expect(form.valid()).toBe(false);
 
     form.setValue("note", "Done");
+    flush();
     expect(form.valid()).toBe(true);
 
     form.setValues({ note: "", url: "https://example.com/pr/1" });
+    flush();
     expect(form.valid()).toBe(true);
   });
 
@@ -157,8 +176,10 @@ describe("Union schemas", () => {
     const form = createForm(Review, { initialValues: { decision: "reject", note: "" } });
     expect(form.valid()).toBe(false);
     form.setValue("note", "Tests fail");
+    flush();
     expect(form.valid()).toBe(true);
     form.setValues({ decision: "approve" });
+    flush();
     expect(form.valid()).toBe(true);
   });
 });
@@ -173,8 +194,11 @@ describe("Field value types", () => {
     });
     const form = createForm(Settings, { initialValues: { name: "Bordaz", description: "" } });
     form.setValue("active", true);
+    flush();
     form.setValue("tags", ["a"]);
+    flush();
     form.setValues({ name: "Board", description: "Kanban" });
+    flush();
     expect(form.values()).toEqual({ name: "Board", description: "Kanban", active: true, tags: ["a"] });
     expect(form.valid()).toBe(true);
   });

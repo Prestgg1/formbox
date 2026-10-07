@@ -1,7 +1,8 @@
 import { registerDefaultFormats } from "./formats";
 import { KindGuard, type TObject, type TUnion, type Static } from "@sinclair/typebox";
 import { TypeCompiler, type TypeCheck } from "@sinclair/typebox/compiler";
-import { createSignal, createMemo, createContext, useContext, splitProps, type JSX, Show } from "solid-js";
+import { createSignal, createMemo, createContext, useContext, omit, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 // --- Types ---
 
@@ -222,14 +223,14 @@ export function Form<T extends FormSchema>(
     children: JSX.Element; 
   } & Omit<JSX.FormHTMLAttributes<HTMLFormElement>, "onSubmit">
 ) {
-  const [local, rest] = splitProps(props, ["form", "onSubmit", "children"]);
-  
+  const rest = omit(props, "form", "onSubmit", "children");
+
   return (
-    <FormContext.Provider value={local.form as unknown as FormInstance<FormSchema>}>
-      <form {...rest} onSubmit={local.form._internalSubmit(local.onSubmit)}>
-        {local.children}
+    <FormContext value={props.form as unknown as FormInstance<FormSchema>}>
+      <form {...rest} onSubmit={props.form._internalSubmit(props.onSubmit)}>
+        {props.children}
       </form>
-    </FormContext.Provider>
+    </FormContext>
   );
 }
 
@@ -237,8 +238,8 @@ export function Field(
   props: { name: string } & Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "name" | "value" | "onInput" | "onBlur">
 ) {
   const form = useFormContext();
-  const [local, rest] = splitProps(props, ["name"]);
-  return <input {...rest} {...form._fieldProps(local.name)} />;
+  const rest = omit(props, "name");
+  return <input {...rest} {...form._fieldProps(props.name)} />;
 }
 
 export function ErrorMessage(props: { name: string; class?: string }) {
